@@ -108,7 +108,7 @@ async def chat(
     
     # Initialize the TodoAgent
     try:
-        agent = TodoAgent(openai_api_key=os.getenv("OPENAI_API_KEY"))
+        agent = TodoAgent(gemini_api_key=os.getenv("GEMINI_API_KEY"))
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

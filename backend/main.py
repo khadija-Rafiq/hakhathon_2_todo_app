@@ -7,10 +7,10 @@ from database import create_db_and_tables
 
 app = FastAPI(title="Todo API")
 
-# CORS configuration - Allow frontend origins
+# CORS configuration - Allow all origins for testing
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "https://your-frontend-url.vercel.app"],  # Add your frontend URL
+    allow_origins=["*"],  # Allow all origins for testing
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
