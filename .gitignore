@@ -67,3 +67,5 @@ htmlcov/
 .env.development.local
 .env.test.local
 .env.production.local
+
+#Updated by Khadija Rafiq
