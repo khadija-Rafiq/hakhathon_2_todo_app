@@ -324,3 +324,5 @@ For endpoints that return multiple items:
 - Default limit: 20 items
 - Maximum limit: 100 items
 - Use offset for pagination: `?limit=20&offset=40` for page 3
+
+Updated by Khadija Rafiq
