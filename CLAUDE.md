@@ -44,3 +44,5 @@ hackathon-todo-phase2/
 - Start frontend: `cd frontend && npm run dev`
 - Install backend deps: `cd backend && python -m venv .venv && .venv\Scripts\activate && pip install -e .`
 - Install frontend deps: `cd frontend && npm install`
+
+Updated by Khadija Rafiq
