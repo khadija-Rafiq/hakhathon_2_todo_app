@@ -203,3 +203,5 @@ For destructive actions (delete, mark complete):
 - Confirm the action when possible
 - Proceed with the user's confirmation
 - Acknowledge the completed action
+
+Updated by Khadija Rafiq

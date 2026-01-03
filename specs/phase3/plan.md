@@ -268,3 +268,5 @@ hackathon-todo-phase3/
 - Test with limited users
 - Gradual rollout to all users
 - Monitor performance and errors
+
+Updated by Khadija Rafiq

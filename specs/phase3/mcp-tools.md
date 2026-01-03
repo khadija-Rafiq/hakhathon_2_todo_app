@@ -342,3 +342,5 @@ This document specifies the Model Context Protocol (MCP) tools that the OpenAI a
   }
 }
 ```
+
+Updated by Khadija Rafiq

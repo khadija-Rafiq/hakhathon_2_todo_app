@@ -59,3 +59,5 @@ ChatKit UI ──▶ FastAPI Server ──▶ Neon DB
 ```
 
 This architecture ensures that all task operations go through the same validated backend as Phase II, maintaining data consistency and security.
+
+Updated by Khadija Rafiq

@@ -155,3 +155,5 @@ The endpoint implements a 10-step stateless request cycle:
 - Handle up to 100 concurrent requests
 - Efficient database queries with proper indexing
 - Proper caching where appropriate
+
+Updated by Khadija Rafiq

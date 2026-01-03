@@ -106,3 +106,5 @@ This approach ensures:
 - MCP tools validate user permissions before operations
 - Conversation history is user-specific
 - API keys stored securely and not exposed to clients
+
+Updated by Khadija Rafiq

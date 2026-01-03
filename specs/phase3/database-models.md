@@ -186,3 +186,5 @@ class ConversationWithMessages(Conversation):
 - Role must be either 'user' or 'assistant'
 - Content must not be empty
 - Created_at is set automatically
+
+Updated by Khadija Rafiq
