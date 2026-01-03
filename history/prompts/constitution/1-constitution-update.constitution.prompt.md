@@ -63,3 +63,5 @@ Also updated the dependent templates:
 - Graders run and results (PASS/FAIL): N/A
 - Prompt variant (if applicable): N/A
 - Next experiment (smallest change to try): Begin feature specification using new constitution
+
+Updated by Khadija Rafiq
