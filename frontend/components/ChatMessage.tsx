@@ -1,8 +1,8 @@
-import { Message } from 'ai';
+import { UIMessage } from 'ai';
 import { Loader2 } from 'lucide-react';
 
 interface ChatMessageProps {
-  message: Message;
+  message: UIMessage;
   isLoading?: boolean;
 }
 
@@ -30,3 +30,11 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
