@@ -77,3 +77,5 @@ Successfully implemented the Phase II Full-Stack Web App with all core functiona
 - Graders run and results (PASS/FAIL): N/A
 - Prompt variant (if applicable): N/A
 - Next experiment (smallest change to try): Test the application functionality
+
+Updated by Khadija Rafiq
