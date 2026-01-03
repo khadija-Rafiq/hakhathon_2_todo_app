@@ -156,3 +156,5 @@ CREATE INDEX idx_tasks_completed ON tasks(completed);
 - Email uniqueness enforced at database level
 - Task title length enforced at database level
 - Required fields enforced at database level
+
+Updated by Khadija Rafiq

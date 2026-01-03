@@ -112,3 +112,6 @@ hackathon-todo-phase2/
 |-----------|------------|-------------------------------------|
 | [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
 | [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+
+Updated by Khadija Rafiq
+

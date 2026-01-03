@@ -130,3 +130,5 @@ The application must work well on different device sizes (desktop, tablet, mobil
 - **SC-008**: API endpoints return appropriate error responses for invalid requests
 - **SC-009**: Authentication tokens expire after 7 days of inactivity
 - **SC-010**: Frontend application loads within 3 seconds on average connection speeds
+
+Updated by Khadija Rafiq

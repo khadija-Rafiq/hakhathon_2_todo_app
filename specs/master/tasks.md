@@ -126,3 +126,5 @@ With multiple developers:
 - All tests for a user story marked [P] can run in parallel
 - Models within a story marked [P] can run in parallel
 - Different user stories can be worked on in parallel by different team members
+
+Updated by Khadija Rafiq

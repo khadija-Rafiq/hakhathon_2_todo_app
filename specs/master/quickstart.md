@@ -213,3 +213,5 @@ npm run lint
 - [Better Auth Documentation](https://better-auth.com/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 - [SQLModel Documentation](https://sqlmodel.tiangolo.com/)
+
+Updated by Khadija Rafiq
