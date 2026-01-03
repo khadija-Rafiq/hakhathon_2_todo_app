@@ -1452,3 +1452,5 @@ All amendments will be communicated via:
 
 **Version**: 1.0.0 | **Ratified**: 2025-12-23 | **Last Amended**: 2025-12-27
 <!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+
+Updated by Khadija Rafiq
