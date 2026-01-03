@@ -17,3 +17,5 @@ A full-stack web application for managing todo lists with user authentication, t
 
 ## Architecture
 The application follows a monorepo structure with separate frontend and backend components, communicating through a REST API.
+
+Updated by Khadija Rafiq
