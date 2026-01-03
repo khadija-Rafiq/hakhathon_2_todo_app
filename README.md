@@ -189,7 +189,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 👨‍💻 Developer
 
-[Your Name] - [Your GitHub Profile]
+Khadija Rafiq - https://github.com/khadija-Rafiq
 
 ## 🙏 Acknowledgments
 
