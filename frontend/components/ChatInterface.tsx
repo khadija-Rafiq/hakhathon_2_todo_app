@@ -16,6 +16,7 @@ interface Message {
   id: string;
   content: string;
   role: 'user' | 'assistant';
+  parts?: Array<{ type: 'text'; text: string }>;
 }
 
 // Define the expected props for child components
@@ -230,7 +231,10 @@ export function ChatInterface({ userId, token, onClose }: ChatInterfaceProps) {
               {messages.map((message) => (
                 <ChatMessage
                   key={message.id}
-                  message={message}
+                  message={{
+      ...message,
+      parts: message.content ? [{ type: 'text', text: message.content }] : []
+    }}
                   isLoading={isLoading && message.role === 'assistant' && !message.content}
                 />
               ))}
