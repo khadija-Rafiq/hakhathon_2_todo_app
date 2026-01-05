@@ -1,7 +1,6 @@
 
 import { FormEvent } from 'react';
 import { Send } from 'lucide-react';
-import VoiceInput from './VoiceInput';
 
 
 interface ChatInputProps {
@@ -28,15 +27,7 @@ export function ChatInput({ input, handleInputChange, handleSubmit, isLoading }:
             autoFocus
           />
 
-           {/* 🎤 Voice Input */}
-          <VoiceInput
-            onSpeechResult={(text) => {
-              handleInputChange({
-                target: { value: text }
-              } as React.ChangeEvent<HTMLInputElement>);
-            }}
-          />
-
+           
           
           <button
             type="submit"
