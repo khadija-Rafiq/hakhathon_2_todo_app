@@ -1,19 +1,41 @@
-import { UIMessage } from 'ai';
+
 import { Loader2 } from 'lucide-react';
 
 interface ChatMessageProps {
-  message: UIMessage;
+  message: any;
   isLoading?: boolean;
 }
 
 export function ChatMessage({ message, isLoading }: ChatMessageProps) {
   const isAssistant = message.role === 'assistant';
 
-  // Ensure parts is always an array so TypeScript won't complain
-  const parts = message.parts ?? [];
+  let content = '';
 
-  // Combine all text parts into a single string
-  const messageText: string = parts.map(part => part.text ?? '').join(' ');
+  if (message.content) {
+    // Case 1: simple text message
+    content = message.content;
+  } else if (Array.isArray(message.parts)) {
+    // Case 2: AI SDK structured message
+    content = message.parts
+      .map((part: any) => {
+        if (part.type === 'text') {
+          return part.text || part.content || '';
+        }
+        if (part.type === 'tool-call') {
+          return `[Tool: ${part.toolName}]`;
+        }
+        if (part.type === 'tool-result') {
+          return `[Result from ${part.toolName}]`;
+        }
+        if (part.type === 'dynamic-tool') {
+          return `[Tool: ${part.toolName}]`;
+        }
+        return '';
+      })
+      .filter(Boolean)
+      .join(' ');
+  }
+
 
   return (
     <div className={`mb-4 flex ${isAssistant ? 'justify-start' : 'justify-end'}`}>
@@ -24,13 +46,13 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
             : 'bg-blue-600 text-white rounded-br-none'
         }`}
       >
-        {isLoading && isAssistant && !messageText ? (
+        {isLoading && isAssistant && !content ? (
           <div className="flex items-center gap-2 text-gray-500">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="italic">Thinking…</span>
           </div>
         ) : (
-          messageText
+          content
         )}
       </div>
     </div>
