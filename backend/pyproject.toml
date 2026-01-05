@@ -17,8 +17,12 @@ dependencies = [
     "psycopg2-binary>=2.9.9",
     "better-exceptions>=0.3.3",
     "python-dotenv>=1.0.0",
-    "httpx>=0.25.0"
+    "httpx>=0.25.0",
+    "openai>=1.0.0"
 ]
+
+[tool.setuptools]
+packages = ["agents", "mcp_tools", "routes", "repositories", "alembic"]
 
 [project.optional-dependencies]
 dev = [

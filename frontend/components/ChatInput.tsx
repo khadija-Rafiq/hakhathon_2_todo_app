@@ -1,45 +1,8 @@
-// import { FormEvent } from 'react';
-
-// interface ChatInputProps {
-//   input: string;
-//   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-//   handleSubmit: (e: FormEvent<HTMLFormElement>) => void;
-//   isLoading: boolean;
-// }
-
-// export function ChatInput({ input, handleInputChange, handleSubmit, isLoading }: ChatInputProps) {
-//   return (
-//     <form
-//       onSubmit={handleSubmit}
-//       className="p-4 border-t border-gray-200 flex"
-//     >
-//       <input
-//         value={input}
-//         placeholder="Type your message here..."
-//         onChange={handleInputChange}
-//         className="flex-1 p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-//         disabled={isLoading}
-//       />
-//       <button
-//         type="submit"
-//         className={`px-6 py-3 rounded-r-lg text-white ${
-//           isLoading
-//             ? 'bg-gray-400 cursor-not-allowed'
-//             : 'bg-blue-500 hover:bg-blue-600'
-//         }`}
-//         disabled={isLoading}
-//       >
-//         {isLoading ? 'Sending...' : 'Send'}
-//       </button>
-//     </form>
-//   );
-// }
-
-
-
 
 import { FormEvent } from 'react';
 import { Send } from 'lucide-react';
+import VoiceInput from './VoiceInput';
+
 
 interface ChatInputProps {
   input: string;
@@ -64,6 +27,16 @@ export function ChatInput({ input, handleInputChange, handleSubmit, isLoading }:
             disabled={isLoading}
             autoFocus
           />
+
+           {/* 🎤 Voice Input */}
+          <VoiceInput
+            onSpeechResult={(text) => {
+              handleInputChange({
+                target: { value: text }
+              } as React.ChangeEvent<HTMLInputElement>);
+            }}
+          />
+
           
           <button
             type="submit"
@@ -89,3 +62,10 @@ export function ChatInput({ input, handleInputChange, handleSubmit, isLoading }:
     </div>
   );
 }
+
+
+
+
+
+
+

@@ -18,6 +18,21 @@ interface Message {
   role: 'user' | 'assistant';
 }
 
+// Define the expected props for child components
+interface ChatMessageProps {
+  message: Message;
+  isLoading?: boolean;
+}
+
+interface ChatInputProps {
+  input: string;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSubmit: (e: React.FormEvent) => void;
+  isLoading: boolean;
+}
+
+interface ChatHeaderProps {}
+
 export function ChatInterface({ userId, token, onClose }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -78,7 +93,10 @@ export function ChatInterface({ userId, token, onClose }: ChatInterfaceProps) {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Try to get error details from response body
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.detail || `HTTP error! status: ${response.status}`;
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -99,19 +117,46 @@ export function ChatInterface({ userId, token, onClose }: ChatInterfaceProps) {
     } catch (error) {
       console.error('Chat error:', error);
 
+      // Determine the appropriate error message based on the error
+      let errorMessage = 'Sorry, there was an error processing your request. Please try again.';
+      let userError = 'Connection error. Please check your internet and try again.';
+
+      // Check if it's a network error or specific API error
+      if (error instanceof Error) {
+        const errorMsg = error.message;
+
+        if (errorMsg.includes('500')) {
+          // Check for specific configuration errors
+          if (errorMsg.includes('OPENROUTER_API_KEY') || errorMsg.includes('AI service is not configured')) {
+            errorMessage = 'Sorry, the OpenRouter AI service is not properly configured. Please contact the administrator to set up the required API keys.';
+            userError = 'OpenRouter AI service configuration error. Please contact the administrator.';
+          } else {
+            errorMessage = 'Sorry, there was an issue with the OpenRouter AI service. The system may not be properly configured.';
+            userError = 'OpenRouter AI service configuration error. Please contact the administrator.';
+          }
+        } else if (errorMsg.includes('401') || errorMsg.includes('403')) {
+          errorMessage = 'Sorry, you are not authorized to access this service.';
+          userError = 'Authentication error. Please log in again.';
+        } else {
+          // Use the actual error message from the server if available
+          errorMessage = `Sorry, there was an error: ${errorMsg}`;
+          userError = `Error: ${errorMsg}`;
+        }
+      }
+
       // Replace placeholder with error message
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === tempAiMessage.id 
-            ? { 
-                ...msg, 
-                content: 'Sorry, there was an error processing your request. Please try again.' 
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === tempAiMessage.id
+            ? {
+                ...msg,
+                content: errorMessage
               }
             : msg
         )
       );
-      
-      setError('Connection error. Please check your internet and try again.');
+
+      setError(userError);
     } finally {
       setIsLoading(false);
     }

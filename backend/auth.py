@@ -15,8 +15,8 @@ load_dotenv()
 
 # JWT settings
 SECRET_KEY = os.getenv("SECRET_KEY", "your-super-secret-key-at-least-32-characters-long")
-ALGORITHM = "HS256"
-TOKEN_EXPIRE_DAYS = 7
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+TOKEN_EXPIRE_DAYS = int(os.getenv("TOKEN_EXPIRE_DAYS", "7"))
 
 # Security scheme for API docs
 security_scheme = HTTPBearer()

@@ -68,4 +68,7 @@ htmlcov/
 .env.test.local
 .env.production.local
 
+nul
+
+
 #Updated by Khadija Rafiq

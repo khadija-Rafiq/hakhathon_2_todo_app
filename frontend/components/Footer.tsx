@@ -174,7 +174,7 @@ export default function Footer() {
               <span>© {currentYear} Todo App.</span>
               <span className="hidden md:inline">All rights reserved.</span>
               <span className="flex items-center gap-1">
-                Made<Heart className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" /> by Muhammad Uzair
+                Made<Heart className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" /> by Khadija Rafiq
               </span>
             </div>
 

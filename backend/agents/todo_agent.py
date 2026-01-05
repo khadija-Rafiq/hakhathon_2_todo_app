@@ -1,11 +1,10 @@
-"""Google Gemini Agent for Phase III Todo Chatbot"""
+"""OpenRouter Agent for Phase III Todo Chatbot"""
 
 import os
 import sys
 import json
 from typing import Dict, Any, List
-import google.generativeai as genai
-from google.generativeai.types import GenerationConfig
+from openai import OpenAI
 
 # Add the backend directory to the Python path to allow absolute imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -30,102 +29,117 @@ except (ImportError, ValueError):
 
 
 class TodoAgent:
-    """Google Gemini Agent configured to work with todo application MCP tools"""
+    """OpenRouter Agent configured to work with todo application MCP tools"""
 
-    def __init__(self, gemini_api_key: str = None):
-        # Initialize Gemini client
-        api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
+    def __init__(self, openrouter_api_key: str = None):
+        # Initialize OpenRouter client
+        api_key = openrouter_api_key or os.getenv("OPENROUTER_API_KEY")
         if not api_key:
-            raise ValueError("Gemini API key is required")
+            raise ValueError("OPENROUTER_API_KEY environment variable is not set. Please configure your API key.")
 
-        genai.configure(api_key=api_key)
+        # Create OpenRouter client
+        self.client = OpenAI(
+            api_key=api_key,
+            base_url="https://openrouter.ai/api/v1"
+        )
 
-        # Define the tools (functions) that Gemini can use
-        function_declarations = [
-            genai.protos.FunctionDeclaration(
-                name=ADD_TASK_DEF["name"],
-                description=ADD_TASK_DEF["description"],
-                parameters=genai.protos.Schema(
-                    type=genai.protos.Type.OBJECT,
-                    properties={
-                        k: genai.protos.Schema(
-                            type=get_gemini_type(v["type"]),
-                            description=v.get("description", "") + (" (Note: user_id is automatically provided)" if k == "user_id" else "")
-                        ) for k, v in ADD_TASK_DEF["parameters"]["properties"].items()
-                    },
-                    required=[param for param in ADD_TASK_DEF["parameters"]["required"] if param != "user_id"]  # Remove user_id from required params for Gemini
-                )
-            ),
-            genai.protos.FunctionDeclaration(
-                name=LIST_TASKS_DEF["name"],
-                description=LIST_TASKS_DEF["description"],
-                parameters=genai.protos.Schema(
-                    type=genai.protos.Type.OBJECT,
-                    properties={
-                        k: genai.protos.Schema(
-                            type=get_gemini_type(v["type"]),
-                            description=v.get("description", "") + (" (Note: user_id is automatically provided)" if k == "user_id" else "")
-                        ) for k, v in LIST_TASKS_DEF["parameters"]["properties"].items()
-                    },
-                    required=[param for param in LIST_TASKS_DEF["parameters"]["required"] if param != "user_id"]  # Remove user_id from required params for Gemini
-                )
-            ),
-            genai.protos.FunctionDeclaration(
-                name=COMPLETE_TASK_DEF["name"],
-                description=COMPLETE_TASK_DEF["description"],
-                parameters=genai.protos.Schema(
-                    type=genai.protos.Type.OBJECT,
-                    properties={
-                        k: genai.protos.Schema(
-                            type=get_gemini_type(v["type"]),
-                            description=v.get("description", "") + (" (Note: user_id is automatically provided)" if k == "user_id" else "")
-                        ) for k, v in COMPLETE_TASK_DEF["parameters"]["properties"].items()
-                    },
-                    required=[param for param in COMPLETE_TASK_DEF["parameters"]["required"] if param != "user_id"]  # Remove user_id from required params for Gemini
-                )
-            ),
-            genai.protos.FunctionDeclaration(
-                name=UPDATE_TASK_DEF["name"],
-                description=UPDATE_TASK_DEF["description"],
-                parameters=genai.protos.Schema(
-                    type=genai.protos.Type.OBJECT,
-                    properties={
-                        k: genai.protos.Schema(
-                            type=get_gemini_type(v["type"]),
-                            description=v.get("description", "") + (" (Note: user_id is automatically provided)" if k == "user_id" else "")
-                        ) for k, v in UPDATE_TASK_DEF["parameters"]["properties"].items()
-                    },
-                    required=[param for param in UPDATE_TASK_DEF["parameters"]["required"] if param != "user_id"]  # Remove user_id from required params for Gemini
-                )
-            ),
-            genai.protos.FunctionDeclaration(
-                name=DELETE_TASK_DEF["name"],
-                description=DELETE_TASK_DEF["description"],
-                parameters=genai.protos.Schema(
-                    type=genai.protos.Type.OBJECT,
-                    properties={
-                        k: genai.protos.Schema(
-                            type=get_gemini_type(v["type"]),
-                            description=v.get("description", "") + (" (Note: user_id is automatically provided)" if k == "user_id" else "")
-                        ) for k, v in DELETE_TASK_DEF["parameters"]["properties"].items()
-                    },
-                    required=[param for param in DELETE_TASK_DEF["parameters"]["required"] if param != "user_id"]  # Remove user_id from required params for Gemini
-                )
-            )
+        # Test the API key by attempting to list models
+        try:
+            self.client.models.list()
+        except Exception as e:
+            raise ValueError(f"Invalid OPENROUTER_API_KEY provided: {str(e)}")
+
+        # Define the tools (functions) that OpenRouter can use
+        self.tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": ADD_TASK_DEF["name"],
+                    "description": ADD_TASK_DEF["description"],
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            k: {
+                                "type": v["type"],
+                                "description": v.get("description", "") + (" (Note: user_id is automatically provided)" if k == "user_id" else "")
+                            } for k, v in ADD_TASK_DEF["parameters"]["properties"].items()
+                        },
+                        "required": [param for param in ADD_TASK_DEF["parameters"]["required"] if param != "user_id"]  # Remove user_id from required params
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": LIST_TASKS_DEF["name"],
+                    "description": LIST_TASKS_DEF["description"],
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            k: {
+                                "type": v["type"],
+                                "description": v.get("description", "") + (" (Note: user_id is automatically provided)" if k == "user_id" else "")
+                            } for k, v in LIST_TASKS_DEF["parameters"]["properties"].items()
+                        },
+                        "required": [param for param in LIST_TASKS_DEF["parameters"]["required"] if param != "user_id"]  # Remove user_id from required params
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": COMPLETE_TASK_DEF["name"],
+                    "description": COMPLETE_TASK_DEF["description"],
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            k: {
+                                "type": v["type"],
+                                "description": v.get("description", "") + (" (Note: user_id is automatically provided)" if k == "user_id" else "")
+                            } for k, v in COMPLETE_TASK_DEF["parameters"]["properties"].items()
+                        },
+                        "required": [param for param in COMPLETE_TASK_DEF["parameters"]["required"] if param != "user_id"]  # Remove user_id from required params
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": UPDATE_TASK_DEF["name"],
+                    "description": UPDATE_TASK_DEF["description"],
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            k: {
+                                "type": v["type"],
+                                "description": v.get("description", "") + (" (Note: user_id is automatically provided)" if k == "user_id" else "")
+                            } for k, v in UPDATE_TASK_DEF["parameters"]["properties"].items()
+                        },
+                        "required": [param for param in UPDATE_TASK_DEF["parameters"]["required"] if param != "user_id"]  # Remove user_id from required params
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": DELETE_TASK_DEF["name"],
+                    "description": DELETE_TASK_DEF["description"],
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            k: {
+                                "type": v["type"],
+                                "description": v.get("description", "") + (" (Note: user_id is automatically provided)" if k == "user_id" else "")
+                            } for k, v in DELETE_TASK_DEF["parameters"]["properties"].items()
+                        },
+                        "required": [param for param in DELETE_TASK_DEF["parameters"]["required"] if param != "user_id"]  # Remove user_id from required params
+                    }
+                }
+            }
         ]
 
-        # Create tools object
-        tools = genai.protos.Tool(function_declarations=function_declarations)
-
-        # Create the model with tools - using the stable gemini-pro model
-        self.model = genai.GenerativeModel(
-            model_name="models/gemini-2.5-flash",
-            generation_config=GenerationConfig(
-                temperature=0.7,
-                max_output_tokens=2048
-            ),
-            tools=[tools]
-        )
+        # Store the model name to use
+        self.model_name = "openai/gpt-4o-mini"  # Using a reliable model from OpenRouter
 
         # Initialize MCP server
         self.mcp_server = TodoMCPServer()
@@ -173,7 +187,7 @@ class TodoAgent:
         user_id: str
     ) -> Dict[str, Any]:
         """
-        Process a user message using the Google Gemini agent with MCP tools
+        Process a user message using the OpenRouter agent with MCP tools
 
         Args:
             user_message: The message from the user
@@ -206,115 +220,95 @@ class TodoAgent:
         # Format conversation history for the API
         formatted_history = []
         for msg in conversation_history:
-            role = "user" if msg["role"] == "user" else "model"  # Gemini uses "model" instead of "assistant"
+            role = msg["role"]  # OpenRouter uses "user" and "assistant" roles
             formatted_history.append({
                 "role": role,
-                "parts": [msg["content"]]
+                "content": msg["content"]
             })
 
-        # Create the full prompt with context
-        full_prompt = f"{system_context}\n\n"
-
-        # Add conversation history
-        for msg in formatted_history:
-            full_prompt += f"{msg['role']}: {msg['parts'][0]}\n"
-
-        # Add the current user message
-        full_prompt += f"user: {user_message}\nmodel:"
+        # Create the messages array with system context, conversation history, and user message
+        messages = [
+            {"role": "system", "content": system_context}
+        ]
+        messages.extend(formatted_history)
+        messages.append({"role": "user", "content": user_message})
 
         try:
-            # Configure the request to prefer function calling
-            generation_config = GenerationConfig(
+            # Call the OpenRouter API with function calling
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=messages,
+                tools=self.tools,
+                tool_choice="auto",
                 temperature=0.7,
-                max_output_tokens=2048
-            )
-
-            # Create a chat session
-            chat = self.model.start_chat()
-
-            # Send the message to the model
-            response = chat.send_message(
-                full_prompt,
-                generation_config=generation_config,
-                safety_settings={
-                    'HARM_CATEGORY_DANGEROUS_CONTENT': 'BLOCK_NONE',
-                    'HARM_CATEGORY_HATE_SPEECH': 'BLOCK_NONE',
-                    'HARM_CATEGORY_HARASSMENT': 'BLOCK_NONE',
-                    'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'BLOCK_NONE'
-                }
+                max_tokens=2048
             )
 
             # Check if the model decided to call a function
             tool_results = []
             tool_calls = []
 
-            if response.candidates and response.candidates[0].content.parts:
-                for part in response.candidates[0].content.parts:
-                    if hasattr(part, 'function_call') and part.function_call:
-                        function_call = part.function_call
-                        function_name = function_call.name
+            # Extract tool calls from the response
+            if (response.choices and
+                response.choices[0].message and
+                hasattr(response.choices[0].message, 'tool_calls') and
+                response.choices[0].message.tool_calls):
+                for tool_call in response.choices[0].message.tool_calls:
+                    function_name = tool_call.function.name
+                    function_args = json.loads(tool_call.function.arguments) if tool_call.function.arguments else {}
 
-                        # Debug: print what we got
-                        print(f"Function called: {function_name}")
-                        print(f"Arguments: {dict(function_call.args) if hasattr(function_call, 'args') and function_call.args is not None else {}}")
+                    print(f"Function called: {function_name}")
+                    print(f"Arguments: {function_args}")
 
-                        if not function_name:
-                            continue  # Skip empty function names
+                    # CRITICAL: Always add user_id - don't rely on agent to provide it
+                    function_args["user_id"] = user_id  # Force override
 
-                        # Safely handle function arguments, defaulting to empty dict if None
-                        function_args = {}
-                        if hasattr(function_call, 'args') and function_call.args is not None:
-                            function_args = {k: v for k, v in function_call.args.items()}
-
-                        # CRITICAL: Always add user_id - don't rely on agent to provide it
-                        function_args["user_id"] = user_id  # Force override
-
-                        # Convert string parameters to appropriate types for specific tools
-                        if function_name in ["complete_task", "update_task", "delete_task"] and "task_id" in function_args:
-                            try:
-                                # Convert task_id from string to integer
-                                function_args["task_id"] = int(function_args["task_id"])
-                            except (ValueError, TypeError):
-                                print(f"Warning: Could not convert task_id '{function_args['task_id']}' to integer for function {function_name}")
-
-                        # Convert 'completed' parameter for complete_task to boolean
-                        if function_name == "complete_task" and "completed" in function_args:
-                            completed_value = function_args["completed"]
-                            if isinstance(completed_value, str):
-                                # Convert string to boolean: 'true'/'True'/'1' -> True, everything else -> False
-                                if completed_value.lower() in ['true', '1']:
-                                    function_args["completed"] = True
-                                elif completed_value.lower() in ['false', '0']:
-                                    function_args["completed"] = False
-                                else:
-                                    # If it's not a recognized boolean string, default to True for 'complete' actions
-                                    function_args["completed"] = True
-                            elif isinstance(completed_value, int):
-                                # Convert integer to boolean
-                                function_args["completed"] = bool(completed_value)
-
-                        # Execute the tool
+                    # Convert string parameters to appropriate types for specific tools
+                    if function_name in ["complete_task", "update_task", "delete_task"] and "task_id" in function_args:
                         try:
-                            result = await self.mcp_server.execute_tool(function_name, function_args)
-                            tool_results.append({
-                                "tool_call_id": function_name,
-                                "result": result
-                            })
-                        except Exception as e:
-                            print(f"Tool execution error: {e}")
-                            tool_results.append({
-                                "tool_call_id": function_name,
-                                "result": {"error": str(e)}
-                            })
+                            # Convert task_id from string to integer
+                            function_args["task_id"] = int(function_args["task_id"])
+                        except (ValueError, TypeError):
+                            print(f"Warning: Could not convert task_id '{function_args['task_id']}' to integer for function {function_name}")
 
-                        tool_calls.append({
-                            "id": function_name,
-                            "function": {
-                                "name": function_name,
-                                "arguments": json.dumps(dict(function_call.args) if hasattr(function_call, 'args') and function_call.args is not None else {})
-                            },
-                            "type": "function"
+                    # Convert 'completed' parameter for complete_task to boolean
+                    if function_name == "complete_task" and "completed" in function_args:
+                        completed_value = function_args["completed"]
+                        if isinstance(completed_value, str):
+                            # Convert string to boolean: 'true'/'True'/'1' -> True, everything else -> False
+                            if completed_value.lower() in ['true', '1']:
+                                function_args["completed"] = True
+                            elif completed_value.lower() in ['false', '0']:
+                                function_args["completed"] = False
+                            else:
+                                # If it's not a recognized boolean string, default to True for 'complete' actions
+                                function_args["completed"] = True
+                        elif isinstance(completed_value, int):
+                            # Convert integer to boolean
+                            function_args["completed"] = bool(completed_value)
+
+                    # Execute the tool
+                    try:
+                        result = await self.mcp_server.execute_tool(function_name, function_args)
+                        tool_results.append({
+                            "tool_call_id": tool_call.id,  # Use tool_call.id instead of function_name
+                            "result": result
                         })
+                    except Exception as e:
+                        print(f"Tool execution error: {e}")
+                        tool_results.append({
+                            "tool_call_id": tool_call.id,  # Use tool_call.id instead of function_name
+                            "result": {"error": str(e)}
+                        })
+
+                    tool_calls.append({
+                        "id": tool_call.id,
+                        "function": {
+                            "name": function_name,
+                            "arguments": tool_call.function.arguments
+                        },
+                        "type": "function"
+                    })
 
             # If there were tool calls, get a final response from the model
             if tool_results:
@@ -343,27 +337,54 @@ class TodoAgent:
                             "tool_results": tool_results
                         }
 
-                # For other tool calls, send the function results back to the chat
-                for tool_result in tool_results:
-                    # Create function response part
-                    function_response = genai.protos.Part(
-                        function_response=genai.protos.FunctionResponse(
-                            name=tool_result["tool_call_id"],
-                            response={"result": tool_result["result"]}
-                        )
-                    )
+                # For other tool calls, send the function results back to the model to get the final response
+                # First, recreate the messages with the assistant's tool call and the tool results
+                final_messages = [
+                    {"role": "system", "content": system_context}
+                ]
+                final_messages.extend(formatted_history)
+                final_messages.append({"role": "user", "content": user_message})
 
-                    # Send the function response to the model to get the final response
-                    final_response = chat.send_message([function_response])
+                # Add the assistant's tool call response
+                final_messages.append({
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": [
+                        {
+                            "id": tc["id"],
+                            "function": {
+                                "name": tc["function"]["name"],
+                                "arguments": tc["function"]["arguments"]
+                            },
+                            "type": "function"
+                        } for tc in tool_calls
+                    ]
+                })
+
+                # Add the tool results to the messages
+                for tool_result in tool_results:
+                    final_messages.append({
+                        "role": "tool",
+                        "content": json.dumps(tool_result["result"]),
+                        "tool_call_id": tool_result["tool_call_id"]
+                    })
+
+                # Get the final response from the model
+                final_response = self.client.chat.completions.create(
+                    model=self.model_name,
+                    messages=final_messages,
+                    temperature=0.7,
+                    max_tokens=2048
+                )
 
                 return {
-                    "response": final_response.text if final_response and final_response.text else "I processed your request using the appropriate tools.",
+                    "response": final_response.choices[0].message.content if final_response.choices and final_response.choices[0].message.content else "I processed your request using the appropriate tools.",
                     "tool_calls": tool_calls,
                     "tool_results": tool_results
                 }
 
             # If no tool calls were made, return the direct response
-            response_text = response.text if response and response.text else "I'm here to help with your todo list."
+            response_text = response.choices[0].message.content if response.choices and response.choices[0].message.content else "I'm here to help with your todo list."
             return {
                 "response": response_text,
                 "tool_calls": [],
@@ -379,14 +400,5 @@ class TodoAgent:
             }
 
 
-def get_gemini_type(json_type: str):
-    """Convert JSON schema type to Gemini type"""
-    type_mapping = {
-        "string": genai.protos.Type.STRING,
-        "number": genai.protos.Type.NUMBER,
-        "integer": genai.protos.Type.INTEGER,
-        "boolean": genai.protos.Type.BOOLEAN,
-        "array": genai.protos.Type.ARRAY,
-        "object": genai.protos.Type.OBJECT
-    }
-    return type_mapping.get(json_type, genai.protos.Type.STRING)
+# The get_gemini_type function is no longer needed since we're using OpenRouter
+# The OpenRouter function definitions use standard JSON schema types directly

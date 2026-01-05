@@ -108,12 +108,23 @@ async def chat(
 
     # Initialize the TodoAgent
     try:
-        agent = TodoAgent(gemini_api_key=os.getenv("GEMINI_API_KEY"))
+        agent = TodoAgent(openrouter_api_key=os.getenv("OPENROUTER_API_KEY"))
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Agent initialization error: {str(e)}"
-        )
+        error_detail = str(e)
+        # Log the error for debugging
+        print(f"Agent initialization error: {error_detail}")
+
+        # Return a more user-friendly error
+        if "OPENROUTER_API_KEY" in error_detail:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="AI service is not configured properly. Please check that the OPENROUTER_API_KEY is set in the environment variables."
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Agent initialization error: {str(e)}"
+            )
 
     # Process the message with the agent
     result = await agent.process_message(user_message, formatted_history, user_id)
