@@ -9,6 +9,12 @@ interface ChatMessageProps {
 export function ChatMessage({ message, isLoading }: ChatMessageProps) {
   const isAssistant = message.role === 'assistant';
 
+  // Ensure parts is always an array so TypeScript won't complain
+  const parts = message.parts ?? [];
+
+  // Combine all text parts into a single string
+  const messageText: string = parts.map(part => part.text ?? '').join(' ');
+
   return (
     <div className={`mb-4 flex ${isAssistant ? 'justify-start' : 'justify-end'}`}>
       <div
@@ -18,13 +24,13 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
             : 'bg-blue-600 text-white rounded-br-none'
         }`}
       >
-        {isLoading && isAssistant && !message.content ? (
+        {isLoading && isAssistant && !messageText ? (
           <div className="flex items-center gap-2 text-gray-500">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="italic">Thinking…</span>
           </div>
         ) : (
-          message.content
+          messageText
         )}
       </div>
     </div>
