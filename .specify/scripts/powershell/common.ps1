@@ -135,6 +135,3 @@ function Test-DirHasFiles {
     }
 }
 
-Updated by Khadija Rafiq
-
-

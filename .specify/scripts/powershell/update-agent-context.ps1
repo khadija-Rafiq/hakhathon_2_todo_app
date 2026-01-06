@@ -9,7 +9,7 @@ Mirrors the behavior of scripts/bash/update-agent-context.sh:
  2. Plan Data Extraction
  3. Agent File Management (create from template or update existing)
  4. Content Generation (technology stack, recent changes, timestamp)
- 5. Multi-Agent Support (claude, openrouter, copilot, cursor-agent, qwen, opencode, codex, windsurf, kilocode, auggie, roo, codebuddy, amp, shai, q, bob, qoder)
+ 5. Multi-Agent Support (claude, gemini, copilot, cursor-agent, qwen, opencode, codex, windsurf, kilocode, auggie, roo, codebuddy, amp, shai, q, bob, qoder)
 
 .PARAMETER AgentType
 Optional agent key to update a single agent. If omitted, updates all existing agent files (creating a default Claude file if none exist).
@@ -25,7 +25,7 @@ Relies on common helper functions in common.ps1
 #>
 param(
     [Parameter(Position=0)]
-    [ValidateSet('claude','openrouter','copilot','cursor-agent','qwen','opencode','codex','windsurf','kilocode','auggie','roo','codebuddy','amp','shai','q','bob','qoder')]
+    [ValidateSet('claude','gemini','copilot','cursor-agent','qwen','opencode','codex','windsurf','kilocode','auggie','roo','codebuddy','amp','shai','q','bob','qoder')]
     [string]$AgentType
 )
 
@@ -45,7 +45,7 @@ $NEW_PLAN = $IMPL_PLAN
 
 # Agent file paths
 $CLAUDE_FILE   = Join-Path $REPO_ROOT 'CLAUDE.md'
-$OPENROUTER_FILE   = Join-Path $REPO_ROOT 'OPENROUTER.md'
+$GEMINI_FILE   = Join-Path $REPO_ROOT 'GEMINI.md'
 $COPILOT_FILE  = Join-Path $REPO_ROOT '.github/agents/copilot-instructions.md'
 $CURSOR_FILE   = Join-Path $REPO_ROOT '.cursor/rules/specify-rules.mdc'
 $QWEN_FILE     = Join-Path $REPO_ROOT 'QWEN.md'
@@ -372,7 +372,7 @@ function Update-SpecificAgent {
     )
     switch ($Type) {
         'claude'   { Update-AgentFile -TargetFile $CLAUDE_FILE   -AgentName 'Claude Code' }
-        'openrouter'   { Update-AgentFile -TargetFile $OPENROUTER_FILE   -AgentName 'OpenRouter CLI' }
+        'gemini'   { Update-AgentFile -TargetFile $GEMINI_FILE   -AgentName 'Gemini CLI' }
         'copilot'  { Update-AgentFile -TargetFile $COPILOT_FILE  -AgentName 'GitHub Copilot' }
         'cursor-agent' { Update-AgentFile -TargetFile $CURSOR_FILE   -AgentName 'Cursor IDE' }
         'qwen'     { Update-AgentFile -TargetFile $QWEN_FILE     -AgentName 'Qwen Code' }
@@ -388,7 +388,7 @@ function Update-SpecificAgent {
         'shai'     { Update-AgentFile -TargetFile $SHAI_FILE     -AgentName 'SHAI' }
         'q'        { Update-AgentFile -TargetFile $Q_FILE        -AgentName 'Amazon Q Developer CLI' }
         'bob'      { Update-AgentFile -TargetFile $BOB_FILE      -AgentName 'IBM Bob' }
-        default { Write-Err "Unknown agent type '$Type'"; Write-Err 'Expected: claude|openrouter|copilot|cursor-agent|qwen|opencode|codex|windsurf|kilocode|auggie|roo|codebuddy|amp|shai|q|bob|qoder'; return $false }
+        default { Write-Err "Unknown agent type '$Type'"; Write-Err 'Expected: claude|gemini|copilot|cursor-agent|qwen|opencode|codex|windsurf|kilocode|auggie|roo|codebuddy|amp|shai|q|bob|qoder'; return $false }
     }
 }
 
@@ -396,7 +396,7 @@ function Update-AllExistingAgents {
     $found = $false
     $ok = $true
     if (Test-Path $CLAUDE_FILE)   { if (-not (Update-AgentFile -TargetFile $CLAUDE_FILE   -AgentName 'Claude Code')) { $ok = $false }; $found = $true }
-    if (Test-Path $OPENROUTER_FILE)   { if (-not (Update-AgentFile -TargetFile $OPENROUTER_FILE   -AgentName 'OpenRouter CLI')) { $ok = $false }; $found = $true }
+    if (Test-Path $GEMINI_FILE)   { if (-not (Update-AgentFile -TargetFile $GEMINI_FILE   -AgentName 'Gemini CLI')) { $ok = $false }; $found = $true }
     if (Test-Path $COPILOT_FILE)  { if (-not (Update-AgentFile -TargetFile $COPILOT_FILE  -AgentName 'GitHub Copilot')) { $ok = $false }; $found = $true }
     if (Test-Path $CURSOR_FILE)   { if (-not (Update-AgentFile -TargetFile $CURSOR_FILE   -AgentName 'Cursor IDE')) { $ok = $false }; $found = $true }
     if (Test-Path $QWEN_FILE)     { if (-not (Update-AgentFile -TargetFile $QWEN_FILE     -AgentName 'Qwen Code')) { $ok = $false }; $found = $true }
@@ -424,7 +424,7 @@ function Print-Summary {
     if ($NEW_FRAMEWORK) { Write-Host "  - Added framework: $NEW_FRAMEWORK" }
     if ($NEW_DB -and $NEW_DB -ne 'N/A') { Write-Host "  - Added database: $NEW_DB" }
     Write-Host ''
-    Write-Info 'Usage: ./update-agent-context.ps1 [-AgentType claude|openrouter|copilot|cursor-agent|qwen|opencode|codex|windsurf|kilocode|auggie|roo|codebuddy|amp|shai|q|bob|qoder]'
+    Write-Info 'Usage: ./update-agent-context.ps1 [-AgentType claude|gemini|copilot|cursor-agent|qwen|opencode|codex|windsurf|kilocode|auggie|roo|codebuddy|amp|shai|q|bob|qoder]'
 }
 
 function Main {
@@ -445,144 +445,4 @@ function Main {
 }
 
 Main
-
-#!/usr/bin/env pwsh
-# Common PowerShell functions analogous to common.sh
-
-function Get-RepoRoot {
-    try {
-        $result = git rev-parse --show-toplevel 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            return $result
-        }
-    } catch {
-        # Git command failed
-    }
-    
-    # Fall back to script location for non-git repos
-    return (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
-}
-
-function Get-CurrentBranch {
-    # First check if SPECIFY_FEATURE environment variable is set
-    if ($env:SPECIFY_FEATURE) {
-        return $env:SPECIFY_FEATURE
-    }
-    
-    # Then check git if available
-    try {
-        $result = git rev-parse --abbrev-ref HEAD 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            return $result
-        }
-    } catch {
-        # Git command failed
-    }
-    
-    # For non-git repos, try to find the latest feature directory
-    $repoRoot = Get-RepoRoot
-    $specsDir = Join-Path $repoRoot "specs"
-    
-    if (Test-Path $specsDir) {
-        $latestFeature = ""
-        $highest = 0
-        
-        Get-ChildItem -Path $specsDir -Directory | ForEach-Object {
-            if ($_.Name -match '^(\d{3})-') {
-                $num = [int]$matches[1]
-                if ($num -gt $highest) {
-                    $highest = $num
-                    $latestFeature = $_.Name
-                }
-            }
-        }
-        
-        if ($latestFeature) {
-            return $latestFeature
-        }
-    }
-    
-    # Final fallback
-    return "main"
-}
-
-function Test-HasGit {
-    try {
-        git rev-parse --show-toplevel 2>$null | Out-Null
-        return ($LASTEXITCODE -eq 0)
-    } catch {
-        return $false
-    }
-}
-
-function Test-FeatureBranch {
-    param(
-        [string]$Branch,
-        [bool]$HasGit = $true
-    )
-    
-    # For non-git repos, we can't enforce branch naming but still provide output
-    if (-not $HasGit) {
-        Write-Warning "[specify] Warning: Git repository not detected; skipped branch validation"
-        return $true
-    }
-    
-    if ($Branch -notmatch '^[0-9]{3}-') {
-        Write-Output "ERROR: Not on a feature branch. Current branch: $Branch"
-        Write-Output "Feature branches should be named like: 001-feature-name"
-        return $false
-    }
-    return $true
-}
-
-function Get-FeatureDir {
-    param([string]$RepoRoot, [string]$Branch)
-    Join-Path $RepoRoot "specs/$Branch"
-}
-
-function Get-FeaturePathsEnv {
-    $repoRoot = Get-RepoRoot
-    $currentBranch = Get-CurrentBranch
-    $hasGit = Test-HasGit
-    $featureDir = Get-FeatureDir -RepoRoot $repoRoot -Branch $currentBranch
-    
-    [PSCustomObject]@{
-        REPO_ROOT     = $repoRoot
-        CURRENT_BRANCH = $currentBranch
-        HAS_GIT       = $hasGit
-        FEATURE_DIR   = $featureDir
-        FEATURE_SPEC  = Join-Path $featureDir 'spec.md'
-        IMPL_PLAN     = Join-Path $featureDir 'plan.md'
-        TASKS         = Join-Path $featureDir 'tasks.md'
-        RESEARCH      = Join-Path $featureDir 'research.md'
-        DATA_MODEL    = Join-Path $featureDir 'data-model.md'
-        QUICKSTART    = Join-Path $featureDir 'quickstart.md'
-        CONTRACTS_DIR = Join-Path $featureDir 'contracts'
-    }
-}
-
-function Test-FileExists {
-    param([string]$Path, [string]$Description)
-    if (Test-Path -Path $Path -PathType Leaf) {
-        Write-Output "  ✓ $Description"
-        return $true
-    } else {
-        Write-Output "  ✗ $Description"
-        return $false
-    }
-}
-
-function Test-DirHasFiles {
-    param([string]$Path, [string]$Description)
-    if ((Test-Path -Path $Path -PathType Container) -and (Get-ChildItem -Path $Path -ErrorAction SilentlyContinue | Where-Object { -not $_.PSIsContainer } | Select-Object -First 1)) {
-        Write-Output "  ✓ $Description"
-        return $true
-    } else {
-        Write-Output "  ✗ $Description"
-        return $false
-    }
-}
-
-Updated by Khadija Rafiq
-
 

@@ -1,13 +1,12 @@
 ---
 
-description: "Task list template for feature implementation following constitution principles"
+description: "Task list template for feature implementation"
 ---
 
 # Tasks: [FEATURE NAME]
 
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
-**Constitution Compliance**: All tasks must follow Todo Evolution Constitution principles
 
 **Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
 
@@ -48,12 +47,10 @@ description: "Task list template for feature implementation following constituti
 ## Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Project initialization and basic structure
-**Constitution Compliance**: Ensure setup follows spec-first development and cloud-native principles
 
 - [ ] T001 Create project structure per implementation plan
 - [ ] T002 Initialize [language] project with [framework] dependencies
 - [ ] T003 [P] Configure linting and formatting tools
-- [ ] T004 Verify Claude Code integration for spec-driven development
 
 ---
 
@@ -252,6 +249,3 @@ With multiple developers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
-
-Updated by Khadija Rafiq
-
