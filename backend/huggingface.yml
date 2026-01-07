@@ -1,0 +1,6 @@
+runtime:
+  python: "3.11"
+  requirements: "requirements.txt"
+
+type: docker
+app_port: 7860
