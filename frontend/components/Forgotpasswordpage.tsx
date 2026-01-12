@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, ArrowLeft, CheckCircle, Sparkles, AlertCircle } from 'lucide-react';
+import { getApiUrl } from '@/lib/utils';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function ForgotPasswordPage() {
 
     try {
       // Call your forgot password API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`, {
+      const response = await fetch(`${getApiUrl()}/api/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

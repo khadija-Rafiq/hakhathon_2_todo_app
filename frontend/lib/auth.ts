@@ -24,14 +24,15 @@ export function getUser() {
 }
 
 export async function signIn(email: string, password: string) {
-  const response = await fetch('http://localhost:8000/api/auth/login', {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7860';
+  const response = await fetch(`${API_URL}/api/auth/login`, {
     method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json' 
+    headers: {
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ 
-      email: email.toLowerCase().trim(), 
-      password 
+    body: JSON.stringify({
+      email: email.toLowerCase().trim(),
+      password
     })
   });
   
@@ -61,15 +62,16 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signUp(name: string, email: string, password: string) {
-  const response = await fetch('http://localhost:8000/api/auth/register', {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7860';
+  const response = await fetch(`${API_URL}/api/auth/register`, {
     method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json' 
+    headers: {
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ 
-      name, 
-      email: email.toLowerCase().trim(), 
-      password 
+    body: JSON.stringify({
+      name,
+      email: email.toLowerCase().trim(),
+      password
     })
   });
   

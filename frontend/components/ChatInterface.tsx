@@ -5,6 +5,7 @@ import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ChatHeader } from './ChatHeader';
 import { CheckCircle2, ListTodo, Sparkles, X } from 'lucide-react';
+import { getApiUrl } from '@/lib/utils';
 
 interface ChatInterfaceProps {
   userId: string;
@@ -81,7 +82,7 @@ export function ChatInterface({ userId, token, onClose }: ChatInterfaceProps) {
 
     try {
       // Send message to backend
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/${userId}/chat`, {
+      const response = await fetch(`${getApiUrl()}/api/${userId}/chat`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

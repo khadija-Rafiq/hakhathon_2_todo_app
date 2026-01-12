@@ -7,6 +7,7 @@ import TaskList from '@/components/TaskList';
 import Footer from '@/components/Footer';
 import { getUser, signOut, isAuthenticated, getToken } from '@/lib/auth';
 import { X, Sparkles } from 'lucide-react';
+import { getApiUrl } from '@/lib/utils';
 
 // Import your ChatInterface if it exists, otherwise we'll use a simple version
 // import { ChatInterface } from '@/components/ChatInterface';
@@ -27,7 +28,7 @@ function SimpleChatInterface({ userId, token, userName }: { userId: string; toke
     const loadConversationHistory = async () => {
       try {
         // Get user's latest conversation
-        const conversationsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/${userId}/conversations`, {
+        const conversationsResponse = await fetch(`${getApiUrl()}/api/${userId}/conversations`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -46,7 +47,7 @@ function SimpleChatInterface({ userId, token, userName }: { userId: string; toke
           setCurrentConversationId(latestConversation.id);
 
           // Get messages for this conversation
-          const messagesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/${userId}/conversations/${latestConversation.id}/messages`, {
+          const messagesResponse = await fetch(`${getApiUrl()}/api/${userId}/conversations/${latestConversation.id}/messages`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -103,7 +104,7 @@ function SimpleChatInterface({ userId, token, userName }: { userId: string; toke
         requestBody.conversation_id = currentConversationId;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/${userId}/chat`, {
+      const response = await fetch(`${getApiUrl()}/api/${userId}/chat`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
