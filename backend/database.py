@@ -14,7 +14,9 @@ if not DATABASE_URL:
 # If using psycopg scheme, convert to psycopg2 scheme to use psycopg2-binary
 if "postgresql+psycopg://" in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.replace("postgresql+psycopg://", "postgresql+psycopg2://")
-engine = create_engine(DATABASE_URL, echo=True, pool_pre_ping=True)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
+engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
 
 def create_db_and_tables():
     """Create database tables for all models"""

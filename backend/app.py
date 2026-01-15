@@ -31,6 +31,10 @@ app.include_router(chat_router, prefix="/api", tags=["chat"])
 def root():
     return {"message": "Todo API is running"}
 
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
+
 # For Hugging Face Spaces
 if __name__ == "__main__":
     import uvicorn

@@ -1,0 +1,20 @@
+services:
+  typescript-app:
+    build:
+      context: .
+    container_name: typescript-app
+    restart: unless-stopped
+    init: true
+    # env_file: ./.env.local  # Uncomment if .env.local file exists and should be used
+    ports:
+      - "3000:3000"  # Expose Next.js app
+    # If you add a database or other services, add 'depends_on' here
+    # networks: [appnet]  # Uncomment if you add more services and need a custom network
+
+# No external services (databases, caches, etc.) detected in the project structure or documentation.
+# No volumes section needed as there are no persistent data requirements for this app.
+
+# If you add more services (e.g., a database), define a network like below:
+# networks:
+#   appnet:
+#     driver: bridge

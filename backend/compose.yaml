@@ -1,0 +1,46 @@
+services:
+  python-backend:
+    build:
+      context: .
+    container_name: python-backend
+    restart: unless-stopped
+    init: true
+    # env_file: ./.env  # Uncomment if .env file exists
+    environment:
+      # The following are required, but secrets should be set via .env
+      # DATABASE_URL: postgres://postgres:postgres@db:5432/todoapp
+      # JWT_SECRET_KEY: <set-in-.env>
+      # JWT_ALGORITHM: HS256
+      # OPENROUTER_API_KEY: <set-in-.env>
+    depends_on:
+      - postgres-db
+    ports:
+      - "7860:7860"  # Expose FastAPI app
+    networks:
+      - backend-net
+
+  postgres-db:
+    image: postgres:latest
+    container_name: postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: todoapp
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - backend-net
+
+networks:
+  backend-net:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    # Persistent storage for PostgreSQL

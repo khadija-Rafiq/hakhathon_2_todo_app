@@ -1,0 +1,65 @@
+# Default values for todo-chatbot
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+frontend:
+  replicaCount: 2
+  image:
+    repository: todo-frontend
+    pullPolicy: IfNotPresent
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  nodeSelector: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 50
+
+backend:
+  replicaCount: 1
+  image:
+    repository: todo-backend
+    pullPolicy: IfNotPresent
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 7860
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 256Mi
+  nodeSelector: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 50
+
+# Database configuration (PostgreSQL)
+database:
+  enabled: true
+  host: postgresql
+  port: 5432
+  username: todo_user
+  password: "todo_password"
+  dbName: todo_db
+
+# Environment variables
+env:
+  NODE_ENV: production
+  NEXT_PUBLIC_API_URL: http://todo-backend-todo-chatbot-backend:7860
+  DATABASE_URL: postgresql://todo_user:todo_password@postgresql:5432/todo_db
+  SECRET_KEY: your-super-secret-key-at-least-32-characters-long
