@@ -5,50 +5,40 @@ FROM node:${NODE_VERSION}-slim AS builder
 WORKDIR /app
 
 # Build argument for API URL
-ARG NEXT_PUBLIC_API_URL=http://localhost:7860
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Install dependencies with caching
-COPY --link package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm \
-    npm ci
+# Install dependencies
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Copy source files (excluding ignored files via .dockerignore)
-COPY --link . .
+# Copy source files
+COPY . .
 
-# Build Next.js app
-RUN --mount=type=cache,target=/root/.npm \
-    npm run build
+# Build Next.js app (standalone)
+RUN npm run build
 
-# Remove dev dependencies for production
+# Remove dev dependencies
 RUN npm prune --production
 
-# Create non-root user
+# --- FINAL IMAGE ---
 FROM node:${NODE_VERSION}-slim AS final
 WORKDIR /app
+
+# Create non-root user
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Copy built app and production deps
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-
-# Copy directories/files only if they exist
+# Copy standalone build
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.js ./next.config.js
-COPY --from=builder /app/app ./app
-COPY --from=builder /app/components ./components
-COPY --from=builder /app/lib ./lib
-COPY --from=builder /app/types ./types
-COPY --from=builder /app/app/globals.css ./app/globals.css
-COPY --from=builder /app/postcss.config.js ./postcss.config.js
-COPY --from=builder /app/tailwind.config.js ./tailwind.config.js
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
-COPY --from=builder /app/next-env.d.ts ./next-env.d.ts
 
+# Set env for production
 ENV NODE_ENV=production
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 USER appuser
 
 EXPOSE 3000
-CMD ["npm", "start"]
+
+# Start the standalone Next.js server
+CMD ["node", "server.js"]

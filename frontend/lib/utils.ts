@@ -8,9 +8,9 @@
 export function getApiUrl(): string {
   if (typeof window !== 'undefined') {
     // Client-side
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7860';
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   } else {
     // Server-side (Next.js API routes, SSR, etc.)
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7860';
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   }
 }
