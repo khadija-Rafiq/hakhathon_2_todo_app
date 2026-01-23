@@ -1,26 +1,26 @@
-
-
 import React, { useState, useEffect } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Calendar, Clock, Repeat } from 'lucide-react';
 
 interface RecurrenceRule {
   type: 'no-repeat' | 'daily' | 'weekly' | 'monthly';
   interval: number;
   daysOfWeek?: string[];
   dayOfMonth?: number;
+  endDate?: string;
+  occurrences?: number;
 }
 
 interface Task {
   id?: number;
   user_id?: string;
   title: string;
-  description: string | null;
-  completed: boolean;
+  description?: string;
+  completed?: boolean;
   created_at?: string;
   updated_at?: string;
   // Recurring task fields
   is_recurring?: boolean;
-  recurrence_rule?: string | null;
+  recurrence_rule?: string;
   parent_task_id?: number | null;
   next_occurrence?: string | null;
   last_occurrence?: string | null;
@@ -29,14 +29,11 @@ interface Task {
   occurrences_count?: number;
 }
 
-interface TaskFormProps {
+interface RecurringTaskFormProps {
   task?: Task;
   onSubmit: (data: {
     title: string;
     description?: string;
-    priority?: string;
-    category?: string;
-    due_date?: string;
     is_recurring?: boolean;
     recurrence_rule?: string;
     end_date?: string;
@@ -46,12 +43,14 @@ interface TaskFormProps {
   isLoading?: boolean;
 }
 
-const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel, isLoading = false }) => {
+const RecurringTaskForm: React.FC<RecurringTaskFormProps> = ({
+  task,
+  onSubmit,
+  onCancel,
+  isLoading = false
+}) => {
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
-  const [priority, setPriority] = useState('Medium');
-  const [category, setCategory] = useState('Personal');
-  const [dueDate, setDueDate] = useState('');
   const [isRecurring, setIsRecurring] = useState(task?.is_recurring || false);
   const [repeatOption, setRepeatOption] = useState<'no-repeat' | 'daily' | 'weekly' | 'monthly'>(
     task?.recurrence_rule ? JSON.parse(task.recurrence_rule!).type : 'no-repeat'
@@ -109,26 +108,15 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel, isLoading
     }
 
     await onSubmit({
+      id: task?.id,
       title: title.trim(),
-      description: description.trim() || undefined,
-      priority,
-      category,
-      due_date: dueDate || undefined,
+      description: description.trim(),
       is_recurring: isRecurring,
       recurrence_rule: recurrenceRuleStr,
       end_date: endDate || undefined,
       max_occurrences: maxOccurrences
     });
   };
-
-  // Reset form when task prop changes
-  useEffect(() => {
-    setTitle(task?.title || '');
-    setDescription(task?.description || '');
-    setIsRecurring(task?.is_recurring || false);
-    setRepeatOption(task?.recurrence_rule ? JSON.parse(task.recurrence_rule!).type : 'no-repeat');
-    setTitleError('');
-  }, [task]);
 
   const handleRepeatChange = (option: 'no-repeat' | 'daily' | 'weekly' | 'monthly') => {
     setRepeatOption(option);
@@ -233,9 +221,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel, isLoading
           </label>
           <select
             name="priority"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
+            defaultValue="Medium"
           >
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
@@ -250,9 +237,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel, isLoading
           </label>
           <select
             name="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
+            defaultValue="Personal"
           >
             <option value="Personal">Personal</option>
             <option value="Work">Work</option>
@@ -264,20 +250,20 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel, isLoading
 
       {/* Due Date Field */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <Calendar className="w-4 h-4" />
           Due Date
         </label>
         <input
           type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
         />
       </div>
 
       {/* Recurrence Section */}
       <div className="pt-4 border-t border-gray-200">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <Repeat className="w-4 h-4" />
           Repeat
         </label>
         <select
@@ -413,4 +399,4 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onSubmit, onCancel, isLoading
   );
 };
 
-export default TaskForm;
+export default RecurringTaskForm;

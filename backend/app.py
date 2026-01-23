@@ -13,14 +13,18 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allow all origins for development
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Startup event to create tables
 @app.on_event("startup")
 def on_startup():
-    create_db_and_tables()
+    try:
+        create_db_and_tables()
+    except Exception as e:
+        print(f"Error creating tables: {e}")
 
 # Include routers
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
@@ -35,8 +39,8 @@ def root():
 def health():
     return {"status": "healthy"}
 
-# For Hugging Face Spaces
+# For development and production
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 7860))
+    port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)

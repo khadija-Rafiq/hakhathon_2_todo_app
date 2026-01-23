@@ -3,6 +3,13 @@ import { getToken } from '@/lib/auth';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Define types
+interface RecurrenceRule {
+  type: 'daily' | 'weekly' | 'monthly';
+  interval: number;
+  daysOfWeek?: string[]; // For weekly recurrence
+  dayOfMonth?: number;   // For monthly recurrence
+}
+
 interface Task {
   id: number;
   user_id: string;
@@ -11,6 +18,15 @@ interface Task {
   completed: boolean;
   created_at: string;
   updated_at: string;
+  // Recurring task fields
+  is_recurring: boolean;
+  recurrence_rule: string | null; // JSON string representation
+  parent_task_id: number | null;
+  next_occurrence: string | null;
+  last_occurrence: string | null;
+  end_date: string | null;
+  max_occurrences: number | null;
+  occurrences_count: number;
 }
 
 interface ApiResponse<T> {
@@ -85,7 +101,17 @@ export const taskApi = {
   // Create a new task
   createTask: async (
     userId: string,
-    data: { title: string; description?: string }
+    data: {
+      title: string;
+      description?: string;
+      priority?: string;
+      category?: string;
+      due_date?: string;
+      is_recurring?: boolean;
+      recurrence_rule?: string;
+      end_date?: string;
+      max_occurrences?: number;
+    }
   ): Promise<Task> => {
     const token = getToken();
     if (!token) {
@@ -115,7 +141,15 @@ export const taskApi = {
   updateTask: async (
     userId: string,
     taskId: number,
-    data: { title?: string; description?: string }
+    data: {
+      title?: string;
+      description?: string;
+      completed?: boolean;
+      is_recurring?: boolean;
+      recurrence_rule?: string;
+      end_date?: string;
+      max_occurrences?: number;
+    }
   ): Promise<Task> => {
     const token = getToken();
     if (!token) {

@@ -13,7 +13,7 @@ app = FastAPI(title="Todo API")
 # -------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Dev purpose
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

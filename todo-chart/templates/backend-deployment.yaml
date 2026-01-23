@@ -4,6 +4,11 @@ metadata:
   name: {{ include "todo-chatbot.backend.fullname" . }}
   labels:
     {{- include "todo-chatbot.backend.labels" . | nindent 4 }}
+  annotations:
+    dapr.io/enabled: "true"
+    dapr.io/app-id: "backend-app"
+    dapr.io/app-port: "{{ .Values.backend.service.port }}"
+    dapr.io/log-level: "debug"
 spec:
   {{- if not .Values.backend.autoscaling.enabled }}
   replicas: {{ .Values.backend.replicaCount }}
@@ -15,6 +20,10 @@ spec:
     metadata:
       {{- with .Values.backend.podAnnotations }}
       annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "backend-app"
+        dapr.io/app-port: "{{ .Values.backend.service.port }}"
+        dapr.io/log-level: "debug"
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -33,16 +42,28 @@ spec:
               value: {{ .Values.env.DATABASE_URL | quote }}
             - name: NODE_ENV
               value: {{ .Values.env.NODE_ENV | quote }}
+            - name: SECRET_KEY
+              value: {{ .Values.env.SECRET_KEY | quote }}
+            - name: OPENROUTER_API_KEY
+              value: {{ .Values.env.OPENROUTER_API_KEY | quote }}
+            - name: ALGORITHM
+              value: {{ .Values.env.ALGORITHM | quote }}
+            - name: TOKEN_EXPIRE_DAYS
+              value: {{ .Values.env.TOKEN_EXPIRE_DAYS | quote }}
             - name: FRONTEND_URL
-              value: {{ printf "http://%s:%d" (include "todo-chatbot.frontend.fullname" .) (.Values.frontend.service.port) | quote }}
+              value: {{ printf "http://%s:3000" (include "todo-chatbot.frontend.fullname" .) | quote }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: /
               port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /health
+              path: /
               port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
       {{- with .Values.backend.nodeSelector }}

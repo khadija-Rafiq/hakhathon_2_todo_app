@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { taskApi } from '@/lib/api';
 import TaskCard from './TaskCard';
 import TaskForm from './TaskForm';
@@ -16,23 +16,39 @@ interface Task {
   completed: boolean;
   created_at: string;
   updated_at: string;
+  // Recurring task fields
+  is_recurring: boolean;
+  recurrence_rule: string | null;
+  parent_task_id: number | null;
+  next_occurrence: string | null;
+  last_occurrence: string | null;
+  end_date: string | null;
+  max_occurrences: number | null;
+  occurrences_count: number;
 }
 
 interface TaskListProps {
   userId: string;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ userId }) => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [deletingTask, setDeletingTask] = useState<Task | null>(null);
+const TaskList = forwardRef<{ refreshTasks: () => Promise<void> }, TaskListProps>(
+  ({ userId }, ref) => {
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [deletingTask, setDeletingTask] = useState<Task | null>(null);
 
-  useEffect(() => {
+    // Expose refreshTasks function via ref
+    useImperativeHandle(ref, () => ({
+      refreshTasks: async () => {
+        await fetchTasks();
+      }
+    }));
+
     const fetchTasks = async () => {
       try {
         setLoading(true);
@@ -46,20 +62,40 @@ const TaskList: React.FC<TaskListProps> = ({ userId }) => {
       }
     };
 
-    fetchTasks();
-  }, [filter, userId]);
+    useEffect(() => {
+      fetchTasks();
+    }, [filter, userId]);
 
-  const handleAddTask = async (data: { title: string; description: string }) => {
-    try {
-      const newTask = await taskApi.createTask(userId, data);
-      setTasks([newTask, ...tasks]);
-      setShowAddModal(false);
-    } catch (err: any) {
-      setError(err.message || 'Failed to add task');
-    }
-  };
+    const handleAddTask = async (data: {
+      title: string;
+      description?: string;
+      priority?: string;
+      category?: string;
+      due_date?: string;
+      is_recurring?: boolean;
+      recurrence_rule?: string;
+      end_date?: string;
+      max_occurrences?: number;
+    }) => {
+      try {
+        const newTask = await taskApi.createTask(userId, data);
+        setTasks([newTask, ...tasks]);
+        setShowAddModal(false);
+      } catch (err: any) {
+        setError(err.message || 'Failed to add task');
+        console.error('Add task error:', err);
+      }
+    };
 
-  const handleEditTask = async (data: { title: string; description: string }) => {
+  const handleEditTask = async (data: {
+    title?: string;
+    description?: string;
+    completed?: boolean;
+    is_recurring?: boolean;
+    recurrence_rule?: string;
+    end_date?: string;
+    max_occurrences?: number;
+  }) => {
     if (!editingTask) return;
     try {
       const updatedTask = await taskApi.updateTask(userId, editingTask.id, data);
@@ -301,7 +337,7 @@ const TaskList: React.FC<TaskListProps> = ({ userId }) => {
       {/* Modals */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl">
+          <div className="bg-white rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">Create New Task</h3>
             <TaskForm onSubmit={handleAddTask} onCancel={() => setShowAddModal(false)} />
           </div>
@@ -310,7 +346,7 @@ const TaskList: React.FC<TaskListProps> = ({ userId }) => {
 
       {editingTask && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl">
+          <div className="bg-white rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">Edit Task</h3>
             <TaskForm task={editingTask} onSubmit={handleEditTask} onCancel={() => setEditingTask(null)} />
           </div>
@@ -325,6 +361,8 @@ const TaskList: React.FC<TaskListProps> = ({ userId }) => {
       />
     </div>
   );
-};
+});
+
+TaskList.displayName = 'TaskList';
 
 export default TaskList;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import TaskList from '@/components/TaskList';
@@ -13,7 +13,7 @@ import { getApiUrl } from '@/lib/utils';
 // import { ChatInterface } from '@/components/ChatInterface';
 
 // Simple Chat Interface (replace with your actual ChatInterface)
-function SimpleChatInterface({ userId, token, userName }: { userId: string; token: string; userName: string }) {
+function SimpleChatInterface({ userId, token, userName, onTasksCreated }: { userId: string; token: string; userName: string; onTasksCreated?: () => void }) {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -142,6 +142,14 @@ function SimpleChatInterface({ userId, token, userName }: { userId: string; toke
       if (data.data?.conversation_id) {
         setCurrentConversationId(data.data.conversation_id);
       }
+
+      // Trigger task list refresh if any tool calls were made
+      if (data.data?.tool_calls && data.data.tool_calls.length > 0 && onTasksCreated) {
+        // Add a small delay to ensure database has been updated
+        setTimeout(() => {
+          onTasksCreated();
+        }, 500);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       // Remove the pending user message and show error
@@ -263,12 +271,13 @@ function SimpleChatInterface({ userId, token, userName }: { userId: string; toke
 }
 
 // ChatModal Component
-function ChatModal({ isOpen, onClose, userId, token, userName }: {
+function ChatModal({ isOpen, onClose, userId, token, userName, onTasksCreated }: {
   isOpen: boolean;
   onClose: () => void;
   userId: string;
   token: string;
   userName: string;
+  onTasksCreated?: () => void;
 }) {
   if (!isOpen) return null;
 
@@ -297,7 +306,7 @@ function ChatModal({ isOpen, onClose, userId, token, userName }: {
 
           {/* Chat Interface */}
           <div className="h-full overflow-hidden">
-            <SimpleChatInterface userId={userId} token={token} userName={userName} />
+            <SimpleChatInterface userId={userId} token={token} userName={userName} onTasksCreated={onTasksCreated} />
           </div>
         </div>
       </div>
@@ -311,6 +320,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const taskListRef = useRef<{ refreshTasks: () => Promise<void> }>(null);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -344,6 +354,12 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
+  const handleTasksCreated = () => {
+    if (taskListRef.current) {
+      taskListRef.current.refreshTasks();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
       {/* Header */}
@@ -355,7 +371,7 @@ export default function DashboardPage() {
       
       {/* Main Content */}
       <main className="flex-1">
-        <TaskList userId={user?.id || ''} />
+        <TaskList ref={taskListRef} userId={user?.id || ''} />
       </main>
 
       {/* Footer */}
@@ -368,6 +384,7 @@ export default function DashboardPage() {
         userId={user?.id || ''}
         userName={user?.name || 'User'}
         token={getToken() || ''}
+        onTasksCreated={handleTasksCreated}
       />
     </div>
   );

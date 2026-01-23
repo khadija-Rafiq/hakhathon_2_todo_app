@@ -17,19 +17,19 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/api/:path*',
+        source: '/(.*)',
         headers: [
           {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
           },
           {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, PUT, DELETE, OPTIONS',
+            key: 'X-Frame-Options',
+            value: 'DENY',
           },
           {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization',
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
           },
         ],
       },
@@ -37,6 +37,10 @@ const nextConfig = {
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  },
+  // Ensure CSS is properly processed
+  experimental: {
+    optimizeCss: true,
   },
 };
 
