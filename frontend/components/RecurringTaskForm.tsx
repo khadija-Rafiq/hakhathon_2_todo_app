@@ -32,6 +32,7 @@ interface Task {
 interface RecurringTaskFormProps {
   task?: Task;
   onSubmit: (data: {
+    id?: number;
     title: string;
     description?: string;
     is_recurring?: boolean;
@@ -59,7 +60,7 @@ const RecurringTaskForm: React.FC<RecurringTaskFormProps> = ({
   const [daysOfWeek, setDaysOfWeek] = useState<string[]>([]);
   const [dayOfMonth, setDayOfMonth] = useState<number>(1);
   const [endDate, setEndDate] = useState<string>(task?.end_date || '');
-  const [maxOccurrences, setMaxOccurrences] = useState<number | undefined>(task?.max_occurrences);
+  const [maxOccurrences, setMaxOccurrences] = useState<number | undefined>(task?.max_occurrences ?? undefined);
   const [titleError, setTitleError] = useState('');
 
   // Initialize recurrence settings from task if provided
@@ -70,7 +71,7 @@ const RecurringTaskForm: React.FC<RecurringTaskFormProps> = ({
       setDaysOfWeek(rule.daysOfWeek || []);
       setDayOfMonth(rule.dayOfMonth || 1);
       setEndDate(task.end_date || '');
-      setMaxOccurrences(task.max_occurrences);
+      setMaxOccurrences(task.max_occurrences ?? undefined);
     }
   }, [task]);
 
