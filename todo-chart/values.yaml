@@ -57,12 +57,3 @@ database:
   password: "todo_password"
   dbName: todo_db
 
-# Environment variables
-env:
-  NODE_ENV: production
-  NEXT_PUBLIC_API_URL: http://127.0.0.1:53812
-  DATABASE_URL: postgresql://todo_user:todo_password@postgresql:5432/todo_db
-  SECRET_KEY: your-super-secret-key-at-least-32-characters-long
-  OPENROUTER_API_KEY: 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
-  ALGORITHM: HS256
-  TOKEN_EXPIRE_DAYS: "7"
