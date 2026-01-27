@@ -1,71 +1,103 @@
 # 🚀 Quick Fix - Azure Environment Variable Setup
 
-## ⚡ 3-Minute Fix
+## ⚡ CRITICAL: Do This First!
 
-### 1️⃣ Azure Portal
+### Azure Portal Configuration (MUST DO!)
+
+**Step 1: Open Azure Portal**
 ```
 https://portal.azure.com
-→ Your Static Web App
-→ Configuration
-→ Application settings
-→ + Add
 ```
 
-### 2️⃣ Add This Variable
+**Step 2: Find Your Static Web App**
+- Search for your app name in the search bar
+- Click on your Static Web App
+
+**Step 3: Add Environment Variable**
 ```
+Left Menu → Configuration → Application settings → + Add
+
 Name:  NEXT_PUBLIC_API_URL
 Value: https://khadija-rafiq-todo-backend.hf.space
+
+Click "Save" button at the top!
 ```
 
-### 3️⃣ Save & Deploy
+**Step 4: Deploy Code**
+```bash
+git add .
+git commit -m "Fix API URL configuration"
+git push
 ```
-Click "Save" button
-→ Push code to GitHub
-→ Wait 5-10 minutes
-→ Done! ✅
-```
+
+**Step 5: Wait 5-10 Minutes**
+- GitHub Actions will automatically deploy
+- Check deployment status in Azure Portal
 
 ## 🧪 Test Karo
 
-1. Open website
-2. Login karo
-3. Chatbot icon click karo
-4. Message send karo: "Show me all my tasks"
-5. Response aana chahiye! 🎉
+1. Open your website
+2. Open Browser Console (Press F12)
+3. Try to login
+4. Console should show:
+   ```
+   ✅ Attempting login with API URL: https://khadija-rafiq-todo-backend.hf.space
+   ```
+   NOT:
+   ```
+   ❌ Attempting login with API URL: http://localhost:8000
+   ```
 
-## ❌ Agar Kaam Nahi Kar Raha
+## ❌ Agar Abhi Bhi localhost:8000 Dikhai De Raha Hai
 
-### Check 1: Environment Variable
+### Solution 1: Clear Browser Cache
 ```
-Azure Portal → Configuration → Application settings
-Variable name exactly "NEXT_PUBLIC_API_URL" hona chahiye
-```
-
-### Check 2: Browser Console
-```
-Press F12 → Console tab
-"localhost:8000" NAHI dikhna chahiye
-"https://khadija-rafiq-todo-backend.hf.space" dikhna chahiye
-```
-
-### Check 3: Backend Health
-```
-Open: https://khadija-rafiq-todo-backend.hf.space/health
-Response: {"status": "ok"}
+1. Press Ctrl + Shift + Delete
+2. Select "Cached images and files"
+3. Click "Clear data"
+4. Refresh page (Ctrl + F5)
 ```
 
-## 📱 Contact
+### Solution 2: Hard Refresh
+```
+Press: Ctrl + Shift + R (Windows)
+Or: Cmd + Shift + R (Mac)
+```
 
-Issue hai? Share karo:
-- Browser console screenshot (F12)
-- Network tab screenshot (F12 → Network)
-- Azure configuration screenshot
+### Solution 3: Check Azure Configuration
+```
+Azure Portal → Your App → Configuration
+
+Verify:
+✅ Variable name is exactly: NEXT_PUBLIC_API_URL
+✅ Value is: https://khadija-rafiq-todo-backend.hf.space
+✅ You clicked "Save" button
+```
+
+### Solution 4: Rebuild & Redeploy
+```bash
+# Make a small change to trigger rebuild
+cd frontend
+echo "# Updated" >> README.md
+git add .
+git commit -m "Trigger rebuild"
+git push
+```
+
+## 📱 Files Changed
+
+✅ `frontend/lib/auth.ts` - Fixed hardcoded localhost
+✅ `frontend/lib/utils.ts` - Fixed API URL handling  
+✅ `frontend/lib/api.ts` - Fixed all API calls
+✅ `frontend/staticwebapp.config.json` - Fixed CSP issues
+
+## 🆘 Still Not Working?
+
+Share these screenshots:
+1. Browser Console (F12 → Console tab)
+2. Network Tab (F12 → Network tab → Try login)
+3. Azure Configuration (Portal → Configuration → Application settings)
 
 ---
 
-**Files Changed:**
-- ✅ `frontend/lib/utils.ts`
-- ✅ `frontend/lib/api.ts`
-- ✅ `frontend/staticwebapp.config.json` (NEW)
-
-**Next Step:** Azure Portal mein environment variable add karo!
+**Next Step:** Set environment variable in Azure Portal NOW!

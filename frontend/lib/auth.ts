@@ -1,5 +1,7 @@
 'use client';
 
+import { getApiUrl } from './utils';
+
 // Authentication helper functions
 export function isAuthenticated(): boolean {
   if (typeof window === 'undefined') return false;
@@ -24,7 +26,7 @@ export function getUser() {
 }
 
 export async function signIn(email: string, password: string) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_URL = getApiUrl();
   
   console.log('Attempting login with API URL:', API_URL);
   console.log('Login endpoint:', `${API_URL}/api/auth/login`);
@@ -74,14 +76,14 @@ export async function signIn(email: string, password: string) {
   } catch (error) {
     console.error('Login error:', error);
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('Failed to connect to server. Please check if the backend is running on http://localhost:8000');
+      throw new Error('Failed to connect to server. Please check your internet connection.');
     }
     throw error;
   }
 }
 
 export async function signUp(name: string, email: string, password: string) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_URL = getApiUrl();
   
   try {
     const response = await fetch(`${API_URL}/api/auth/register`, {
@@ -113,7 +115,7 @@ export async function signUp(name: string, email: string, password: string) {
     return data;
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('Failed to connect to server. Please check if the backend is running on http://localhost:8000');
+      throw new Error('Failed to connect to server. Please check your internet connection.');
     }
     throw error;
   }
