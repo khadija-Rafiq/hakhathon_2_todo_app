@@ -1,19 +1,17 @@
-// /** @type {import('next').NextConfig} */
-// const nextConfig = {
-//   experimental: {
-//     appDir: true,
-//   },
-//   env: {
-//     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-//   },
-// };
-
-// module.exports = nextConfig;
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+
+  // 🔑 REQUIRED for Azure Static Web Apps
+  output: 'export',
+
+  // Optional: clean URLs (no .html)
+  trailingSlash: true,
+
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  },
+
   async headers() {
     return [
       {
@@ -34,13 +32,6 @@ const nextConfig = {
         ],
       },
     ];
-  },
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-  },
-  // Ensure CSS is properly processed
-  experimental: {
-    optimizeCss: true,
   },
 };
 
