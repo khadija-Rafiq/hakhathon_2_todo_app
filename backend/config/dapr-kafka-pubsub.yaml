@@ -1,0 +1,16 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: kafka-pubsub
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+  - name: brokers
+    value: "localhost:9092"  # Replace with actual Kafka broker addresses in production
+  - name: consumerGroup
+    value: "todo-app-group"
+  - name: clientID
+    value: "todo-app"
+  - name: authType
+    value: "none"

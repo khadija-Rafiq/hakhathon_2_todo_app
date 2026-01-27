@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: todo_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/todo_db
+      - KAFKA_BROKERS=kafka:9092
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+    depends_on:
+      - postgres
+      - kafka
+    volumes:
+      - ./backend:/app
+
+  recurring-task-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m services.recurring_task_service
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/todo_db
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+      - backend
+
+  notification-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m services.notification_service
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/todo_db
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - kafka
+
+  audit-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m services.audit_service
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/todo_db
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - kafka
+
+  websocket-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python -m services.websocket_service
+    ports:
+      - "8765:8765"
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - kafka
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

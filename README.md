@@ -1,9 +1,9 @@
-# Hackathon II: Todo Evolution - Phase II
+# Hackathon II: Todo Evolution - Phase V
 
 ## 📋 Project Overview
-A progressive, cloud-native todo application that evolves from a simple console app to a sophisticated AI-powered system. Phase II transforms the console app into a full-stack web application with Next.js frontend, FastAPI backend, PostgreSQL database, and user authentication.
+A progressive, cloud-native todo application that evolves from a simple console app to a sophisticated AI-powered system with event-driven architecture. Phase V introduces advanced cloud deployment with Kafka and Dapr, enabling scalable microservices for advanced features like recurring tasks, reminders, and real-time synchronization.
 
-## 🚀 Phase II Features
+## 🚀 Phase V Features
 - ✅ User registration and authentication with JWT
 - ✅ Create, read, update, delete tasks
 - ✅ Mark tasks as complete/incomplete
@@ -11,6 +11,14 @@ A progressive, cloud-native todo application that evolves from a simple console 
 - ✅ Responsive design (mobile, tablet, desktop)
 - ✅ Multi-user support with data isolation
 - ✅ Deployed application (Vercel + Railway)
+- ✅ AI-Powered Chatbot with natural language processing
+- ✅ Recurring Tasks with various recurrence patterns
+- ✅ Event-Driven Architecture with Kafka messaging
+- ✅ Microservices with Dapr integration
+- ✅ Real-time updates via WebSocket
+- ✅ Advanced notification and reminder system
+- ✅ Audit logging for compliance
+- ✅ Kubernetes deployment on cloud platforms (AKS/GKE/OKE)
 
 ## 🛠️ Technology Stack
 

@@ -7,7 +7,7 @@ from routes.chat import router as chat_router
 from database import create_db_and_tables
 
 # Initialize FastAPI app
-app = FastAPI(title="Todo API")
+app = FastAPI(title="Todo API with Kafka Integration")
 
 # -------------------------
 # CORS configuration
@@ -39,7 +39,7 @@ def health_check():
 # -------------------------
 @app.get("/")
 def root():
-    return {"message": "Todo API is running"}
+    return {"message": "Todo API is running with Kafka integration"}
 
 # -------------------------
 # API Routes
@@ -47,3 +47,16 @@ def root():
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
 app.include_router(tasks_router, prefix="/api", tags=["tasks"])
 app.include_router(chat_router, prefix="/api", tags=["chat"])
+
+# -------------------------
+# Kafka Integration Info
+# -------------------------
+@app.get("/kafka-status")
+def kafka_status():
+    from kafka_producer import event_publisher
+    status = {
+        "kafka_producer_initialized": event_publisher.producer is not None,
+        "kafka_brokers": event_publisher.kafka_brokers,
+        "message": "Kafka producer is configured but may not be connected if Kafka is not running"
+    }
+    return status

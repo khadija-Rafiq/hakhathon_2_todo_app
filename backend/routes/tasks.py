@@ -8,6 +8,9 @@ from datetime import datetime, timedelta
 import json
 import calendar
 
+# Import Kafka event publisher
+from kafka_producer import get_event_publisher
+
 router = APIRouter()
 
 @router.get("/{user_id}/tasks", response_model=list[TaskRead])
@@ -156,6 +159,11 @@ def create_task(
     session.commit()
     session.refresh(task)
 
+    # Publish task creation event to Kafka via Dapr
+    event_publisher = get_event_publisher()
+    task_dict = task.dict() if hasattr(task, 'dict') else {c.name: getattr(task, c.name) for c in task.__table__.columns}
+    event_publisher.publish_task_event("created", task_dict, user_id)
+
     return task
 
 
@@ -285,6 +293,21 @@ def update_task(
     session.commit()
     session.refresh(task)
 
+    # Publish task update event to Kafka via Dapr
+    event_publisher = get_event_publisher()
+    task_dict = task.dict() if hasattr(task, 'dict') else {c.name: getattr(task, c.name) for c in task.__table__.columns}
+    event_publisher.publish_task_event("updated", task_dict, user_id)
+
+    # If due date was updated, publish reminder event
+    if task_update.due_date is not None:
+        event_publisher.publish_reminder_event(
+            task_id=task.id,
+            title=task.title,
+            due_at=task.due_date,
+            remind_at=task.due_date,  # For simplicity, use due date as reminder time
+            user_id=user_id
+        )
+
     return task
 
 
@@ -316,6 +339,11 @@ def delete_task(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to delete this task"
         )
+
+    # Publish task deletion event to Kafka via Dapr before deleting
+    event_publisher = get_event_publisher()
+    task_dict = task.dict() if hasattr(task, 'dict') else {c.name: getattr(task, c.name) for c in task.__table__.columns}
+    event_publisher.publish_task_event("deleted", task_dict, user_id)
 
     session.delete(task)
     session.commit()
@@ -359,6 +387,11 @@ def toggle_complete(
     session.add(task)
     session.commit()
     session.refresh(task)
+
+    # Publish task update event to Kafka via Dapr
+    event_publisher = get_event_publisher()
+    task_dict = task.dict() if hasattr(task, 'dict') else {c.name: getattr(task, c.name) for c in task.__table__.columns}
+    event_publisher.publish_task_event("updated", task_dict, user_id)
 
     return task
 
