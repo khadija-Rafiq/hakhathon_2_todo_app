@@ -1,6 +1,5 @@
 import { getToken } from '@/lib/auth';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { getApiUrl } from '@/lib/utils';
 
 // Define types
 interface RecurrenceRule {
@@ -44,7 +43,7 @@ export const taskApi = {
       throw new Error('Authentication token not found');
     }
 
-    let url = `${API_URL}/api/${userId}/tasks`;
+    let url = `${getApiUrl()}/api/${userId}/tasks`;
     if (status && status !== 'all') {
       url += `?status=${status}`;
     }
@@ -80,7 +79,7 @@ export const taskApi = {
       throw new Error('Authentication token not found');
     }
 
-    const response = await fetch(`${API_URL}/api/${userId}/tasks/${taskId}`, {
+    const response = await fetch(`${getApiUrl()}/api/${userId}/tasks/${taskId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -118,7 +117,7 @@ export const taskApi = {
       throw new Error('Authentication token not found');
     }
 
-    const response = await fetch(`${API_URL}/api/${userId}/tasks`, {
+    const response = await fetch(`${getApiUrl()}/api/${userId}/tasks`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -156,7 +155,7 @@ export const taskApi = {
       throw new Error('Authentication token not found');
     }
 
-    const response = await fetch(`${API_URL}/api/${userId}/tasks/${taskId}`, {
+    const response = await fetch(`${getApiUrl()}/api/${userId}/tasks/${taskId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -182,7 +181,7 @@ export const taskApi = {
       throw new Error('Authentication token not found');
     }
 
-    const response = await fetch(`${API_URL}/api/${userId}/tasks/${taskId}`, {
+    const response = await fetch(`${getApiUrl()}/api/${userId}/tasks/${taskId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -212,7 +211,7 @@ export const taskApi = {
       requestBody.completed = completed;
     }
 
-    const response = await fetch(`${API_URL}/api/${userId}/tasks/${taskId}/complete`, {
+    const response = await fetch(`${getApiUrl()}/api/${userId}/tasks/${taskId}/complete`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
